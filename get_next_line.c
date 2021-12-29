@@ -6,117 +6,72 @@
 /*   By: ekeen-wy <ekeen-wy@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/27 13:25:16 by ekeen-wy          #+#    #+#             */
-/*   Updated: 2021/12/29 11:36:10 by ekeen-wy         ###   ########.fr       */
+/*   Updated: 2021/12/29 17:04:05 by ekeen-wy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-static char	*gnl_substr(char const *s, unsigned int start, size_t len)
+static void	gnl_clear(t_list *str)
 {
-	unsigned int	i;
-	char			*ptr;
+	t_list	*tempnode;
 
-	if (s == NULL)
-		return (NULL);
-	if (start >= ft_strlen(s))
+	while (str != NULL)
 	{
-		ptr = (char *)malloc(sizeof(char));
-		*ptr = '\0';
-		return (ptr);
-	}
-	if (len > ft_strlen(s + start))
-		len = ft_strlen(s + start);
-	ptr = (char *)malloc(sizeof(char) * (len + 1));
-	if (ptr == NULL)
-		return (NULL);
-	i = 0;
-	while (len-- > 0 && *(s + start) != '\0')
-	{
-		*(ptr + i) = *(char *)(s + start);
-		start++;
-		i++;
-	}
-	*(ptr + i) = '\0';
-	return (ptr);
-}
-
-static char	*gnl_output(t_list **str, char *line)
-{
-	char			*output;
-	char			*temp;
-	t_list			*tempnode;
-
-	output = gnl_substr(line, 0,
-			ft_strlen(line) - ft_strlen(ft_strchr(line, '\n')) + 1);
-	while (*str != NULL)
-	{
-		tempnode = *str;
-		*str = tempnode -> next;
+		tempnode = str;
+		str = tempnode -> next;
 		free(tempnode -> content);
 		free(tempnode);
 	}
-	temp = gnl_substr(line,
-			ft_strlen(line) - ft_strlen(ft_strchr(line, '\n')) + 1,
-			ft_strlen(ft_strchr(line, '\n')) - 1);
-	*str = ft_lstnew(temp);
-	free(temp);
-	free(line);
-	return (output);
 }
 
-static char	*gnl_process(t_list **str)
+static char	*gnl_output(t_list **str)
 {
-	char			*tempstr;
 	char			*line;
-	char			*clear_line;
 	t_list			*tempnode;
+	unsigned int	i;
+	unsigned int	j;
 
-	if (*str == NULL)
+	if (!*str)
 		return (NULL);
 	tempnode = *str;
-	tempstr = tempnode -> content;
-	clear_line = NULL;
-	if (tempnode -> next != NULL)
-	{
-		while (tempnode -> next != NULL)
-		{
-			tempnode = tempnode -> next;
-			line = ft_strjoin(tempstr, tempnode -> content);
-			if (clear_line != NULL)
-				free(clear_line);
-			tempstr = line;
-			clear_line = line;
-		}
-	}
+	i = ft_strlen(tempnode -> content);
+	j = ft_strlen(ft_strchr(tempnode -> content, '\n'));
+	line = gnl_substr(tempnode -> content, 0, i - j + 1);
+	if (i == j + 1)
+		*str = 0;
 	else
-		line = ft_strjoin("", tempnode -> content);
-	return (gnl_output(str, line));
+		*str = ft_lstnew("", ft_strchr(tempnode -> content, '\n') + 1);
+	gnl_clear(tempnode);
+	return (line);
 }
 
-static int	gnl_read(int fd, t_list **str, char *buf)
+static void	gnl_read(int fd, t_list **str, char *buf)
 {
 	unsigned int	bytes_read;
 	t_list			*ptr;
 
 	ptr = *str;
-	if (!ptr || !ft_strchr(ptr -> content, '\n'))
+	if (!*str || !ft_strchr(ptr -> content, '\n'))
 	{
 		bytes_read = read(fd, buf, BUFFER_SIZE);
 		while (bytes_read > 0)
 		{
 			buf[bytes_read] = '\0';
 			if (!*str)
-				*str = ft_lstnew(buf);
+				*str = ft_lstnew("", buf);
 			else
-				ft_lstadd_back(str, ft_lstnew(buf));
+			{
+				ptr = *str;
+				*str = ft_lstnew(ptr -> content, buf);
+				gnl_clear(ptr);
+			}
 			if (ft_strchr(buf, '\n') != NULL)
 				break ;
 			bytes_read = read(fd, buf, BUFFER_SIZE);
 		}
 	}
 	free(buf);
-	return (bytes_read);
 }
 
 char	*get_next_line(int fd)
@@ -129,7 +84,6 @@ char	*get_next_line(int fd)
 	buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (buf == NULL)
 		return (NULL);
-	if (gnl_read(fd, &str, buf) == 0)
-		return (NULL);
-	return (gnl_process(&str));
+	gnl_read(fd, &str, buf);
+	return (gnl_output(&str));
 }
