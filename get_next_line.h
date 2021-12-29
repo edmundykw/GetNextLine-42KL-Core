@@ -6,7 +6,7 @@
 /*   By: ekeen-wy <ekeen-wy@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/27 13:23:46 by ekeen-wy          #+#    #+#             */
-/*   Updated: 2021/12/28 09:14:00 by ekeen-wy         ###   ########.fr       */
+/*   Updated: 2021/12/29 16:45:29 by ekeen-wy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@ typedef struct s_list
 	void			*content;
 	struct s_list	*next;
 }	t_list;
-t_list	*ft_lstnew(void *content);
-void	ft_lstadd_back(t_list **lst, t_list *new);
+t_list	*ft_lstnew(void *content_1, void *content_2);
+char	*gnl_substr(char const *s, unsigned int start, size_t len);
 size_t	ft_strlen(const char *str);
 char	*ft_strjoin(char const *s1, char const *s2);
 char	*ft_strchr(const char *s, int c);
