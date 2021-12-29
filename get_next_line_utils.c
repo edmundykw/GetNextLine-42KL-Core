@@ -6,7 +6,7 @@
 /*   By: ekeen-wy <ekeen-wy@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/27 13:34:46 by ekeen-wy          #+#    #+#             */
-/*   Updated: 2021/12/28 21:59:51 by ekeen-wy         ###   ########.fr       */
+/*   Updated: 2021/12/29 16:07:31 by ekeen-wy         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,30 +62,45 @@ char	*ft_strchr(const char *s, int c)
 	return (NULL);
 }
 
-t_list	*ft_lstnew(void *content)
+char	*gnl_substr(char const *s, unsigned int start, size_t len)
+{
+	unsigned int	i;
+	char			*ptr;
+
+	if (s == NULL)
+		return (NULL);
+	if (start >= ft_strlen(s))
+	{
+		ptr = (char *)malloc(sizeof(char));
+		*ptr = '\0';
+		return (ptr);
+	}
+	if (len > ft_strlen(s + start))
+		len = ft_strlen(s + start);
+	ptr = (char *)malloc(sizeof(char) * (len + 1));
+	if (ptr == NULL)
+		return (NULL);
+	i = 0;
+	while (len-- > 0 && *(s + start) != '\0')
+	{
+		*(ptr + i) = *(char *)(s + start);
+		start++;
+		i++;
+	}
+	*(ptr + i) = '\0';
+	return (ptr);
+}
+
+t_list	*ft_lstnew(void *content_1, void *content_2)
 {
 	t_list	*node;
 	char	*copy_str;
 
 	node = (t_list *)malloc(sizeof(t_list));
-	copy_str = ft_strjoin("", content);
+	copy_str = ft_strjoin(content_1, content_2);
 	if (node == NULL)
 		return (NULL);
 	node -> content = copy_str;
 	node -> next = NULL;
 	return (node);
-}
-
-void	ft_lstadd_back(t_list **lst, t_list *new)
-{
-	t_list	*check_last;
-
-	check_last = *lst;
-	while (check_last != NULL)
-	{
-		if (check_last -> next == NULL)
-			break ;
-		check_last = check_last -> next;
-	}
-	check_last -> next = new;
 }
